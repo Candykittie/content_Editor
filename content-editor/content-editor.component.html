@@ -1,0 +1,126 @@
+<div class="content-editor"> 
+  <h2>Content Editor</h2>
+
+  <!-- Toggle View Mode Button -->
+  <div class="icon-button" (click)="toggleViewMode()" [title]="isViewMode ? 'View Mode' : 'Edit Mode'">
+    <ng-container *ngIf="isViewMode">
+      <img src="assets/icons/visibility.png" alt="View Mode" />
+    </ng-container>
+    <ng-container *ngIf="!isViewMode">
+      <img src="assets/icons/no-view.png" alt="Edit Mode" />
+    </ng-container>
+  </div>
+  
+ <!-- <button (click)="navigateToUserManual()">View</button> -->
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+  <!-- Manual View Section -->
+  <div *ngIf="isManualView" class="manual-view" >
+    <div class="manual-content" >
+      <h2>{{ selectedRow?.Type }}</h2>
+      <p>{{ selectedRow?.Content }}</p>
+      <div *ngIf="selectedRow?.['Image URL']">
+        <img [src]="selectedRow['Image URL']" alt="{{ selectedRow?.['Image Text']  }}" />
+      </div>
+      <p>{{ selectedRow?.['What`s New'] }}</p>
+    </div>
+    
+  </div>
+
+  <div *ngIf="isManualView" class="manual-view">
+    <div *ngFor="let content of renderedContent" [innerHTML]="content.renderedContent"></div>
+  </div>
+
+  <div class="index-display">
+    <p *ngIf="currentRowIndex !== null && currentColumnIndex !== null" >
+       Row {{ currentRowIndex+1 }}, Column  {{ currentColumnIndex+1 }} 
+    </p>
+  </div>
+
+  <!-- Content Editor Table -->
+  <div *ngIf="!isManualView">
+    <table>
+      <thead>
+        <tr>
+          <th *ngFor="let column of ['ID', 'Ordering', 'Type', 'Content', 'Image URL', 'Image Text', 'What`s New']; let colIndex = index;" [ngStyle]="getColumnStyle(column)">
+            {{ column }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <!-- <tr *ngFor="let row of contentData; let rowIndex = index" style="height: max-content;"> -->
+          <tr *ngFor="let row of contentData; let rowIndex = index" [id]="'row-' + rowIndex">
+            <!-- <tr *ngFor="let row of contentData; let rowIndex = index" [id]="'row-' + rowIndex"||LineLocator> -->
+              <!-- <tr *ngFor="let row of contentData; let i = index" id="row-{{ i }}"> -->
+
+          
+          <td *ngFor="let column of columns; let colIndex = index" class="table-cell" [class.active-cell]="isActiveCell(rowIndex, colIndex)"
+            [ngStyle]="getColumnStyle(column)"
+            (click)="!isViewMode && startEdit(row, column) || setActiveCell(rowIndex, colIndex)"
+            (focus)="setActiveCell(rowIndex, colIndex)" tabindex="0">
+           
+            <ng-container *ngIf="isEditing(row, column) && !isViewMode; else displayMode">
+              <!-- Dropdown -->
+              <ng-container *ngIf="column === 'content_Type'; else otherColumns">
+                <select [(ngModel)]="row[column]" (change)="updateContentData(row)" style="width: 100%;">
+                  <option *ngFor="let option of dropdownOptions" [value]="option">
+                    {{ option }}
+                  </option>
+                </select>
+              </ng-container>
+              
+
+              <!-- Editable -->
+              <ng-template #otherColumns>
+                <textarea *ngIf="isTextareaMode(row, column)" [(ngModel)]="row[column]" (blur)="stopEdit(row, column); updateContentData(row)" style="width: 100%; height: 4.5rem; min-height: 20px; resize: none; overflow-wrap: break-word;" rows="5"></textarea>
+              </ng-template>
+            </ng-container>
+           
+            <!-- Display Mode -->
+            <ng-template #displayMode>
+              <span>{{ row[column] }}</span>
+            </ng-template>
+          
+          </td>
+          
+          <!-- View Button for Navigation -->
+          <td>
+            <DIV *ngIf="!isViewMode">
+              <!-- <button (click)="navigateToUserManual(row)" class="book-button">
+                <img src="assets/icons/book-open-svgrepo-com.png" alt="Book" class="book-icon" />
+              </button> -->
+              <button (click)="navigateToUserManual(row)" class="book-button">
+              
+                <img src="assets/icons/book-open-svgrepo-com.png" alt="Book" class="book-icon"/>
+                <!-- router link -->
+                <!-- <img src="assets/icons/book-open-svgrepo-com.png" alt="Book" class="book-icon" routerLink="['/MDK']"[queryParams]= "{navigatetoselectedtopicChange}"/> -->
+              </button>
+              <!-- <button class="book-button">
+                <img
+                  src="assets/icons/book-open-svgrepo-com.png"
+                  alt="Book"
+                  class="book-icon"
+                  [routerLink]="['/MDK']"
+                  [queryParams]="{ navigatetoselectedtopicChange}"
+                /> -->
+              <!-- </button> -->
+              
+            </DIV>
+            
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+<!-- </div> -->
+
+<!-- <app-content-editor 
+  *ngIf="!navigateToUserManual" 
+  (navigatetoselectedtopicChange)="(navigatetoselectedtopictoMDK)">
+</app-content-editor> -->
+<!-- 
+<app-manifold-design-knowledge *ngIf="shouldShowContentEditor" [navigatetoselectedtopictoMDK]="navigatetoselectedtopicChange">
+  
+</app-manifold-design-knowledge> -->
+
